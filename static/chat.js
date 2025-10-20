@@ -56,10 +56,11 @@ if (collapseControls && collapseControls.length) {
 
 let lastPresence = [];
 function renderSidebar(friends) {
-  if (!sidebar) return;
-  // keep collapsed state when re-rendering
-  const wasCollapsed = sidebar.classList.contains("collapsed");
-  sidebar.innerHTML = "<h3>Chats</h3>";
+  const body = document.getElementById("sidebar-body");
+  if (!body) return;
+  // keep collapsed state on the sidebar element
+  const wasCollapsed = sidebar && sidebar.classList.contains("collapsed");
+  body.innerHTML = "";
   friends.forEach((f) => {
     const el = document.createElement("div");
     el.className = "friend-item";
@@ -73,14 +74,13 @@ function renderSidebar(friends) {
         <div class="friend-last">${f.last ? f.last.msg.slice(0, 40) : ""}</div>
       </div>`;
     el.addEventListener("click", () => {
-      // navigate to chat with query so body data-room is set on reload
       window.location.href = `/?room=${encodeURIComponent(
         f.room
       )}&partner=${encodeURIComponent(f.username)}`;
     });
-    sidebar.appendChild(el);
+    body.appendChild(el);
   });
-  if (wasCollapsed) sidebar.classList.add("collapsed");
+  if (sidebar && wasCollapsed) sidebar.classList.add("collapsed");
 }
 
 function loadSidebar() {
