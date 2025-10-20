@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Friends</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/mini.css@3.0.1/dist/mini-default.min.css"
+    />
+  </head>
+  <body>
+    <main style="max-width: 720px; margin: 32px auto">
+      <h2>Your friends</h2>
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <div
+        style="
+          background: #fff0f0;
+          border: 1px solid #f5c6cb;
+          color: #721c24;
+          padding: 12px;
+          border-radius: 6px;
+          margin-bottom: 12px;
+          font-weight: 600;
+        "
+      >
+        {% for m in messages %}
+        <div>{{ m }}</div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
+
+      <section style="margin-bottom: 20px">
+        <form
+          method="post"
+          style="display: flex; gap: 8px; align-items: center"
+        >
+          <input
+            name="username"
+            placeholder="Friend's username"
+            style="
+              flex: 1;
+              padding: 8px;
+              border-radius: 6px;
+              border: 1px solid #e9eef6;
+            "
+          />
+          <button class="btn">Add friend</button>
+        </form>
+      </section>
+
+      {% if incoming %}
+      <section style="margin-bottom: 20px">
+        <h3>Pending requests</h3>
+        <ul>
+          {% for r in incoming %}
+          <li style="margin-bottom: 8px">
+            {{ r.username }}
+            <form
+              method="post"
+              action="/friends/respond"
+              style="display: inline"
+            >
+              <input type="hidden" name="request_id" value="{{ r.id }}" />
+              <button name="action" value="accept" class="btn small">
+                Accept
+              </button>
+              <button name="action" value="decline" class="btn small">
+                Decline
+              </button>
+            </form>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endif %}
+
+      <section>
+        <ul>
+          {% for f in friends %}
+          <li style="margin-bottom: 8px">
+            {{ f.username }}
+            <a
+              class="btn small"
+              href="/?room={{ f.room }}&partner={{ f.username }}"
+              >Private chat</a
+            >
+          </li>
+          {% else %}
+          <li>No friends yet</li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <p><a href="/">Back to chat</a></p>
+    </main>
+  </body>
+</html>

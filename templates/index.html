@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Realtime Chat</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/mini.css@3.0.1/dist/mini-default.min.css"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body
+    data-current-user="{{ username or '' }}"
+    data-room="{{ room or '' }}"
+    data-partner="{{ partner or '' }}"
+  >
+    <div class="app-shell">
+      <aside id="sidebar" class="sidebar">
+        <div
+          class="sidebar-header"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: space-between;
+          "
+        >
+          <div style="font-weight: 700">Chats</div>
+          <div
+            class="collapse-control"
+            style="cursor: pointer; font-size: 12px; color: #3b82f6"
+          >
+            Toggle
+          </div>
+        </div>
+      </aside>
+      <div class="main-content">
+        <header class="topbar">
+          <div class="topbar-left">
+            <h1 class="app-title">Realtime Chat</h1>
+            <div class="app-sub">Telegram-like UI</div>
+          </div>
+          <div class="topbar-right">
+            {% if username %}
+            <div class="ctrl">Hi, {{ username }}</div>
+            <div class="collapse-control">Toggle Sidebar</div>
+            <a class="btn small" href="/logout">Logout</a>
+            {% else %}
+            <input
+              id="username"
+              class="ctrl username"
+              placeholder="Your name"
+              value=""
+            />
+            <input
+              id="room"
+              class="ctrl room"
+              placeholder="main"
+              value="main"
+            />
+            <button id="joinBtn" class="btn small">Join</button>
+            <button id="leaveBtn" class="btn small" disabled>Leave</button>
+            {% endif %}
+          </div>
+        </header>
+
+        <main class="chat-wrap">
+          <section class="chat-area">
+            <div id="messages" class="messages"></div>
+          </section>
+
+          <footer class="chat-input">
+            <form id="chatForm" class="input-form">
+              <input
+                id="msgInput"
+                class="msg"
+                placeholder="Type a message..."
+                autocomplete="off"
+              />
+              <button class="send">Send</button>
+            </form>
+          </footer>
+        </main>
+      </div>
+    </div>
+    {% if partner %}
+    <div style="position: fixed; right: 16px; bottom: 86px">
+      <a class="btn" href="/?room={{ room }}&partner={{ partner }}"
+        >Chat with {{ partner }}</a
+      >
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+    <script src="/static/chat.js"></script>
+  </body>
+</html>
