@@ -37,3 +37,19 @@ gunicorn -k eventlet -w 1 app:app
 ```
 
 - Set environment variable `SECRET_KEY` in Render dashboard for production.
+
+### Database (PostgreSQL)
+
+This app supports PostgreSQL (recommended for Render) via the `DATABASE_URL` environment variable.
+
+- On Render, if you provision a PostgreSQL instance (Internal DB), set `DATABASE_URL` to the Internal connection string. Example:
+
+```
+DATABASE_URL=postgresql://chatuser:lMYdRgXlwgdLUWRouYlcp4ejfWnAsAcp@dpg-d3r4tf8dl3ps73cdle3g-a/chatdb_y9kn
+```
+
+- Locally, you can also set `DATABASE_URL` to point to your local Postgres. If not set, the app falls back to a local SQLite file `chat.db`.
+
+Notes:
+- If your provider gives a URL starting with `postgres://`, it will be normalized to `postgresql://` automatically.
+- On first run, tables are created automatically. The app contains a small SQLite-only migration to add `password_hash` if you had a very old local DB.
