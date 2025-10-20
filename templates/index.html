@@ -27,9 +27,11 @@
           "
         >
           <div style="font-weight: 700">Chats</div>
-          <div style="display:flex; gap:8px; align-items:center">
+          <div style="display: flex; gap: 8px; align-items: center">
             {% if username %}
-            <a class="btn small" href="/friends" title="Add friend">Add</a>
+            <div class="add-friend-wrap">
+              <a class="btn small add-friend-btn" href="/friends" title="Add friend" aria-label="Add friend">Add</a>
+            </div>
             {% endif %}
             <div
               class="collapse-control"

@@ -97,10 +97,34 @@ body {
 .sidebar.collapsed .friend-item {
   justify-content: center;
 }
+.add-friend-wrap {
+  display: inline-flex;
+}
+.add-friend-btn {
+  padding: 6px 10px;
+}
+/* when sidebar is collapsed, show the add button as a circular icon */
+.sidebar.collapsed .add-friend-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+}
+.sidebar.collapsed .add-friend-btn::before {
+  content: "+";
+  font-weight: 700;
+}
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  /* allow children flex items to shrink properly so inner scroll works */
+  min-height: 0;
 }
 .friend-item {
   display: flex;
@@ -123,13 +147,14 @@ body {
   color: var(--muted);
 }
 .chat-area {
-  flex: 1;
+  flex: 1 1 auto;
   padding: 16px;
   display: flex;
   flex-direction: column;
+  min-height: 0; /* IMPORTANT for proper child scrolling */
 }
 .messages {
-  flex: 1;
+  flex: 1 1 auto;
   overflow: auto;
   display: flex;
   flex-direction: column;
