@@ -51,5 +51,6 @@ DATABASE_URL=postgresql://chatuser:lMYdRgXlwgdLUWRouYlcp4ejfWnAsAcp@dpg-d3r4tf8d
 - Locally, you can also set `DATABASE_URL` to point to your local Postgres. If not set, the app falls back to a local SQLite file `chat.db`.
 
 Notes:
+
 - If your provider gives a URL starting with `postgres://`, it will be normalized to `postgresql://` automatically.
 - On first run, tables are created automatically. The app contains a small SQLite-only migration to add `password_hash` if you had a very old local DB.

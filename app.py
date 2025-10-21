@@ -239,6 +239,39 @@ def friends_respond():
     return redirect(url_for('friends'))
 
 
+@app.route('/friends/remove', methods=['POST'])
+def friends_remove():
+    # remove an existing friendship (mutual)
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    me = User.query.filter_by(username=session.get('username')).first()
+    if not me:
+        flash('User session invalid')
+        return redirect(url_for('login'))
+    friend_id = request.form.get('friend_id')
+    try:
+        fid = int(friend_id)
+    except Exception:
+        flash('Invalid friend')
+        return redirect(url_for('friends'))
+    # delete both directions if present
+    f1 = Friendship.query.filter_by(user_id=me.id, friend_id=fid).first()
+    f2 = Friendship.query.filter_by(user_id=fid, friend_id=me.id).first()
+    removed = False
+    if f1:
+        db.session.delete(f1)
+        removed = True
+    if f2:
+        db.session.delete(f2)
+        removed = True
+    if removed:
+        db.session.commit()
+        flash('Bạn bè đã được xóa')
+    else:
+        flash('Bạn bè không tồn tại')
+    return redirect(url_for('friends'))
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -248,30 +281,30 @@ def register():
         # validation
         if not username:
             print("[auth-debug] register: missing username")
-            flash('Username required')
+            flash('Chưa nhập username')
             return render_template('register.html', username='')
         if len(username) < 3:
             print("[auth-debug] register: username too short")
-            flash('Username must be at least 3 characters')
+            flash('Username phải có ít nhất 3 ký tự')
             return render_template('register.html', username=username)
         if not password:
             print("[auth-debug] register: missing password")
-            flash('Password required')
+            flash('Chưa nhập mật khẩu')
             return render_template('register.html', username=username)
         if len(password) < 6:
             print("[auth-debug] register: password too short")
-            flash('Password must be at least 6 characters')
+            flash('Mật khẩu phải có ít nhất 6 ký tự')
             return render_template('register.html', username=username)
         if User.query.filter_by(username=username).first():
             print("[auth-debug] register: username taken")
-            flash('Username already taken')
+            flash('Username đã được sử dụng')
             return render_template('register.html', username=username)
         # create user
         user = User(username=username, password_hash=generate_password_hash(password))
         db.session.add(user)
         db.session.commit()
         session['username'] = username
-        flash('Registration successful. You are now logged in.')
+        flash('Đăng ký thành công. Bạn đã đăng nhập.')
         return redirect(url_for('index'))
     return render_template('register.html', username='')
 
@@ -285,26 +318,26 @@ def login():
         # validation
         if not username:
             print("[auth-debug] login: missing username")
-            flash('Username required')
+            flash('Chưa nhập username')
             return render_template('login.html', username='')
         if not password:
             print("[auth-debug] login: missing password")
-            flash('Password required')
+            flash('Chưa nhập mật khẩu')
             return render_template('login.html', username=username)
         user = User.query.filter_by(username=username).first()
         print(f"[auth-debug] login: lookup user -> {user}")
         if not user:
             print("[auth-debug] login: unknown user -> redirect to register view (render login with message)")
-            flash('Unknown user. Please register first.')
+            flash('Người dùng không tồn tại. Vui lòng đăng ký trước.')
             return render_template('login.html', username='')
         # verify password
         if not user.password_hash or not check_password_hash(user.password_hash, password):
             print("[auth-debug] login: invalid credentials")
-            flash('Invalid credentials')
+            flash('Thông tin đăng nhập không hợp lệ')
             return render_template('login.html', username=username)
         session['username'] = username
         print(f"[auth-debug] login: success for user={username}")
-        flash('Logged in successfully.')
+        flash('Đăng nhập thành công.')
         return redirect(url_for('index'))
     return render_template('login.html', username='')
 
@@ -330,7 +363,7 @@ def handle_join(data):
     history_payload = [m.as_dict() for m in history]
     # emit only to the joining client
     emit('history', {'messages': history_payload}, room=request.sid)
-    emit('status', {'msg': f'{username} has entered the room.'}, room=room)
+    emit('status', {'msg': f'{username} đã vào phòng.'}, room=room)
     # track online by username if provided
     if username and username != 'Anonymous':
         s = online_users.get(username, set())

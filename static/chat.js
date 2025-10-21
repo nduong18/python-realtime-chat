@@ -62,6 +62,13 @@ function renderSidebar(friends) {
   const wasCollapsed = sidebar && sidebar.classList.contains("collapsed");
   body.innerHTML = "";
   friends.forEach((f) => {
+    // skip any reserved/global room named 'General'
+    if (
+      typeof f.username === "string" &&
+      f.username.trim().toLowerCase() === "general"
+    ) {
+      return;
+    }
     const el = document.createElement("div");
     el.className = "friend-item";
     el.dataset.room = f.room;
@@ -206,7 +213,7 @@ chatForm.addEventListener("submit", (e) => {
 });
 
 socket.on("connect", () => {
-  addStatus("Connected to server.");
+  addStatus("Kết nối server thành công.");
   console.log("[chat] socket connected id=", socket.id);
   // load friends sidebar for logged-in users
   applyCollapsedState();
@@ -230,12 +237,12 @@ socket.on("connect", () => {
 
   // if a partner is injected, add a small status line
   if (injectedPartner) {
-    addStatus(`Private chat with ${injectedPartner}`);
+    addStatus(`Trò chuyện riêng với ${injectedPartner}`);
   }
 });
 
 socket.on("disconnect", () => {
-  addStatus("Disconnected from server.");
+  addStatus("Mất kết nối với server.");
 });
 
 socket.on("status", (data) => {
@@ -277,3 +284,59 @@ socket.on("presence_list", (payload) => {
 
 // apply collapsed state immediately
 applyCollapsedState();
+
+// Emoji picker behaviour
+const emojiBtn = document.getElementById("emojiBtn");
+const emojiPicker = document.getElementById("emojiPicker");
+function closeEmojiPicker() {
+  if (emojiPicker) emojiPicker.style.display = "none";
+}
+function openEmojiPicker() {
+  if (emojiPicker) emojiPicker.style.display = "grid";
+}
+if (emojiBtn && emojiPicker) {
+  emojiBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = emojiPicker.style.display === "grid";
+    if (isOpen) closeEmojiPicker();
+    else openEmojiPicker();
+  });
+
+  // click on emoji item
+  emojiPicker.addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".emoji-item");
+    if (!btn) return;
+    const emoji = btn.textContent || "";
+    // insert at caret in input
+    const input = msgInput;
+    if (!input) return;
+    const start = input.selectionStart || 0;
+    const end = input.selectionEnd || 0;
+    const val = input.value;
+    input.value = val.slice(0, start) + emoji + val.slice(end);
+    // move caret after inserted emoji
+    const pos = start + emoji.length;
+    input.setSelectionRange(pos, pos);
+    input.focus();
+    // close picker after select
+    closeEmojiPicker();
+  });
+
+  // close on outside click
+  document.addEventListener("click", (e) => {
+    if (!emojiPicker) return;
+    if (e.target === emojiBtn || emojiBtn.contains(e.target)) return;
+    if (emojiPicker.contains(e.target)) return;
+    closeEmojiPicker();
+  });
+
+  // close on Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeEmojiPicker();
+  });
+
+  // hide picker on send
+  chatForm.addEventListener("submit", () => {
+    closeEmojiPicker();
+  });
+}

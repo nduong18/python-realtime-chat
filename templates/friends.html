@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Friends</title>
+    <title>Bạn bè</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/mini.css@3.0.1/dist/mini-default.min.css"
@@ -11,7 +11,7 @@
   </head>
   <body>
     <main style="max-width: 720px; margin: 32px auto">
-      <h2>Your friends</h2>
+      <h2>Bạn bè</h2>
       {% with messages = get_flashed_messages() %} {% if messages %}
       <div
         style="
@@ -37,7 +37,7 @@
         >
           <input
             name="username"
-            placeholder="Friend's username"
+            placeholder="Nhập username bạn bè"
             style="
               flex: 1;
               padding: 8px;
@@ -45,7 +45,7 @@
               border: 1px solid #e9eef6;
             "
           />
-          <button class="btn">Add friend</button>
+          <button class="btn">Thêm bạn bè</button>
         </form>
       </section>
 
@@ -63,10 +63,10 @@
             >
               <input type="hidden" name="request_id" value="{{ r.id }}" />
               <button name="action" value="accept" class="btn small">
-                Accept
+                Chấp nhận
               </button>
               <button name="action" value="decline" class="btn small">
-                Decline
+                Từ chối
               </button>
             </form>
           </li>
@@ -78,21 +78,46 @@
       <section>
         <ul>
           {% for f in friends %}
-          <li style="margin-bottom: 8px">
-            {{ f.username }}
+          <li
+            style="
+              margin-bottom: 8px;
+              display: flex;
+              gap: 8px;
+              align-items: center;
+            "
+          >
+            <div style="flex: 1">{{ f.username }}</div>
             <a
               class="btn small"
               href="/?room={{ f.room }}&partner={{ f.username }}"
-              >Private chat</a
+              >Chat riêng</a
             >
+            <form
+              method="post"
+              action="/friends/remove"
+              style="display: inline"
+            >
+              <input type="hidden" name="friend_id" value="{{ f.id }}" />
+              <button
+                type="submit"
+                class="btn small"
+                style="
+                  background: #ffeded;
+                  color: #c9302c;
+                  border-color: transparent;
+                "
+              >
+                Xóa
+              </button>
+            </form>
           </li>
           {% else %}
-          <li>No friends yet</li>
+          <li>Không có bạn bè nào, hãy thêm bạn bè</li>
           {% endfor %}
         </ul>
       </section>
 
-      <p><a href="/">Back to chat</a></p>
+      <p><a href="/">Quay lại trò chuyện</a></p>
     </main>
   </body>
 </html>
