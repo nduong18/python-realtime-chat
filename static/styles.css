@@ -139,6 +139,14 @@ body {
   background: #f7fbff;
   border-color: #eef6ff;
 }
+.friend-item.active {
+  background: #eef6ff; /* slightly darker */
+  border-color: #dcecff;
+}
+.friend-item.active .friend-name {
+  color: #0b1f3a;
+  font-weight: 700;
+}
 .friend-name {
   font-weight: 600;
 }

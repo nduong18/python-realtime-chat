@@ -61,6 +61,27 @@ function renderSidebar(friends) {
   // keep collapsed state on the sidebar element
   const wasCollapsed = sidebar && sidebar.classList.contains("collapsed");
   body.innerHTML = "";
+  // add a persistent 'General' room at the top so users can always return to main chat
+  const generalEl = document.createElement("div");
+  generalEl.className = "friend-item";
+  generalEl.dataset.room = "main";
+  const generalOnline = false; // don't mark as online by username
+  generalEl.innerHTML = `<div class="friend-name">General</div>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:8px">
+        <div class="presence-dot ${
+          generalOnline ? "online" : "offline"
+        }" title="General"></div>
+        <div class="friend-last"></div>
+      </div>`;
+  generalEl.addEventListener("click", () => {
+    window.location.href = `/?room=main`;
+  });
+  body.appendChild(generalEl);
+  // mark active if current room is main or injectedRoom
+  const currentRoom = injectedRoom || (roomInput && roomInput.value) || "main";
+  if (currentRoom === "main") {
+    generalEl.classList.add("active");
+  }
   friends.forEach((f) => {
     // skip any reserved/global room named 'General'
     if (
@@ -85,6 +106,14 @@ function renderSidebar(friends) {
         f.room
       )}&partner=${encodeURIComponent(f.username)}`;
     });
+    // mark active if this is the current room
+    try {
+      const currentRoomLocal =
+        injectedRoom || (roomInput && roomInput.value) || "main";
+      if (String(f.room) === String(currentRoomLocal)) {
+        el.classList.add("active");
+      }
+    } catch (e) {}
     body.appendChild(el);
   });
   if (sidebar && wasCollapsed) sidebar.classList.add("collapsed");
@@ -101,7 +130,17 @@ function loadSidebar() {
 
 function timeNow() {
   const d = new Date();
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  // Show local Vietnam time for quick status messages
+  try {
+    return new Intl.DateTimeFormat("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Ho_Chi_Minh",
+    }).format(new Date());
+  } catch (e) {
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
 }
 
 function avatarFor(name) {
@@ -149,11 +188,18 @@ function addMessageBubble({ username, msg, ts }) {
   meta.className = "meta";
   // prefer server timestamp if present
   if (ts) {
-    const d = new Date(ts);
-    meta.textContent = d.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    try {
+      // parse server ISO timestamp (assumed UTC) and format to Vietnam time
+      const d = new Date(ts);
+      meta.textContent = new Intl.DateTimeFormat("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Ho_Chi_Minh",
+      }).format(d);
+    } catch (e) {
+      meta.textContent = timeNow();
+    }
   } else {
     meta.textContent = timeNow();
   }

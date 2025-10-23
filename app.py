@@ -3,7 +3,7 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import inspect, text
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
 app = Flask(__name__)
@@ -54,7 +54,8 @@ class Message(db.Model):
             'username': self.username,
             'room': self.room,
             'msg': self.msg,
-            'ts': self.ts.isoformat()
+            # emit timestamps as explicit UTC ISO strings (append Z)
+            'ts': (self.ts.isoformat() + 'Z') if self.ts is not None else None
         }
 
 
@@ -382,7 +383,9 @@ def handle_message(data):
     m = Message(username=username, room=room, msg=msg)
     db.session.add(m)
     db.session.commit()
-    emit('message', {'username': username, 'msg': msg, 'ts': m.ts.isoformat()}, room=room)
+    # emit timestamp as explicit UTC ISO (append Z) so clients parse as UTC
+    ts_val = (m.ts.isoformat() + 'Z') if m.ts is not None else None
+    emit('message', {'username': username, 'msg': msg, 'ts': ts_val}, room=room)
 
 
 @socketio.on('leave')
